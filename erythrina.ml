@@ -1,19 +1,52 @@
+(* #load "graphics.cma";; *)
+(* #load "str.cma";; *)
+
 let rec read_lines lines =
   try read_lines (read_line () :: lines)
-      with End_of_file -> lines
+  with End_of_file -> lines
 
-let lines = read_lines []
-
-let matcher input matched line =
-  if input = line then
-    line :: matched
+let lines = if !Sys.interactive then
+    ["greetings"; "humans"; "the"; "year"; "2000"; "her"; "hundreds"]
   else
-    matched
+    read_lines []
 
-let pat = "hello"
+let lines_matching pattern matched line =
+  try let _ = Str.search_forward pattern line 0 in 
+      line :: matched
+    with Not_found -> matched
 
-let matched = List.fold_left (matcher pat) [] lines
+let escape = function
+  | ' ' -> ".*"
+  | c -> Char.escaped c
 
-let matched_string = String.concat "\n" matched
+let pattern input =
+  Str.regexp (String.concat "" (List.map escape input))
 
-;; print_string matched_string
+let matched input lines =
+  List.fold_left (lines_matching (pattern input)) [] lines
+
+let rec draw_matches matches =
+  Graphics.open_graph " 1440x15";
+  Graphics.set_window_title "erythrina";
+  Graphics.draw_string (String.concat " | " matches)
+
+let finish input lines =
+  Graphics.close_graph ();
+  match matched input lines with
+      f :: _ -> print_string f
+    | [] -> ()
+
+let delete input =
+  match List.rev input with
+      [] -> []
+    | _ :: rest -> List.rev rest
+
+let rec main input =
+  draw_matches (matched input lines);
+  match Graphics.read_key ()  with
+      (* enter *) '\r' -> finish input lines
+    | (* escape *) '\027' -> Graphics.close_graph ()
+    | (* delete *) '\b' -> main (delete input)
+    | (* any other *) c -> main (List.append input [c])
+
+;; main []
