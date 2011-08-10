@@ -44,6 +44,7 @@ let delete input =
 let rec main input =
   draw_matches (matched input lines);
   match Graphics.read_key ()  with
+      (* TODO: support cycling through options *)
       (* enter *) '\r' -> finish input lines
     | (* escape *) '\027' -> Graphics.close_graph ()
     | (* delete *) '\b' -> main (delete input)
