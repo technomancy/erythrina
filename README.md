@@ -23,8 +23,10 @@ currently treats space as a wildcard, so "er th ml" will match
 ## Todo
 
 * Allow cycling of options
+* Tab completion
+* Order by historical usage
 * Custom colors
-* Change font (xft?)
+* Change font
 
 ## License
 

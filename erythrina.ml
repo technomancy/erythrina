@@ -1,14 +1,8 @@
-(* #load "graphics.cma";; *)
-(* #load "str.cma";; *)
-
 let rec read_lines lines =
   try read_lines (read_line () :: lines)
   with End_of_file -> lines
 
-let lines = if !Sys.interactive then
-    ["greetings"; "humans"; "the"; "year"; "2000"; "her"; "hundreds"]
-  else
-    read_lines []
+let lines = read_lines []
 
 let lines_matching pattern matched line =
   try let _ = Str.search_forward pattern line 0 in 
@@ -33,21 +27,20 @@ let rec draw_matches matches =
 let finish input lines =
   Graphics.close_graph ();
   match matched input lines with
-      f :: _ -> print_string f
+    | f :: _ -> print_string f
     | [] -> ()
 
-let delete input =
+let butlast input =
   match List.rev input with
-      [] -> []
+    | [] -> []
     | _ :: rest -> List.rev rest
 
 let rec main input =
   draw_matches (matched input lines);
   match Graphics.read_key ()  with
-      (* TODO: support cycling through options *)
-      (* enter *) '\r' -> finish input lines
+    | (* enter *) '\r' -> finish input lines
     | (* escape *) '\027' -> Graphics.close_graph ()
-    | (* delete *) '\b' -> main (delete input)
+    | (* backspace *) '\b' -> main (butlast input)
     | (* any other *) c -> main (List.append input [c])
 
-;; main []
+let _ = main []
