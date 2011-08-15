@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# This example asks the user to pick a directory from ~/music or its
+# first argument and queues up its contents via mpd. http://musicpd.org
+
+music_home=${1:-"$HOME/music/"}
+
+# Cache directory list
+list_file="$music_home/.dirs"
+if [ ! -f "$list_file" ]; then
+    find "$music_home" -type d | cut -c $(echo $music_home | wc -c)- > "$list_file"
+fi
+
+# Ask the user
+chosen=`cat $list_file | erythrina`
+
+# Add it to mpd
+if [ "$chosen" != "" ]; then
+    mpc clear
+    mpc add "$chosen"
+    mpc play
+fi
+
+# You may find it helpful to bind these commands to keystrokes in
+# addition to this script:
+
+# notify-send "Now Playing" "`mpc | head -n 1`"
+
+##!/usr/bin/env ruby
+# current = `mpc`.split("\n").first
+# playlist = `mpc playlist`.split("\n")
+# current_index = playlist.index(current)
+# rest = playlist[(current_index + 1) .. (current_index + 5)].join("\n")
+# system "notify-send \"#{current}\" \"#{rest}\""
